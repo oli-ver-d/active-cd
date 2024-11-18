@@ -1,0 +1,9 @@
+[package]
+name = "active-cd"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.93"
+crossterm = "0.28.1"
+dirs = "5.0.1"
