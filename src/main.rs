@@ -7,15 +7,14 @@ use crossterm::style::{Color, SetForegroundColor};
 use crossterm::{
     cursor,
     cursor::MoveTo,
-    event::{read, Event, KeyCode, KeyEvent},
+    event::{read, Event, KeyCode},
     execute, queue,
     style::Print,
     terminal::{self, size, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::env;
-use std::fs;
 use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn main() -> Result<()> {
     let current_dir = env::current_dir()?;
