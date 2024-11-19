@@ -1,13 +1,15 @@
 use std::path::PathBuf;
-use std::collections;
+use std::collections::BTreeMap;
 use std::fs;
+
+const HOME_ROW_KEYS: &[char] = &['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
 pub struct App {
     pub start_dir: PathBuf,
     pub current_dir: PathBuf,
     pub user_input: String,
     pub output: OutputType,
-    pub subdirectories: Vec<PathBuf>,
+    pub subdirectories: BTreeMap<String, PathBuf>,
     pub show_hidden: bool,
 }
 
@@ -18,7 +20,7 @@ impl App {
             current_dir,
             user_input: String::new(),
             output: OutputType::Current,
-            subdirectories: vec![],
+            subdirectories: BTreeMap::new(),
             show_hidden,
         };
         new_app.update_subdirectories();
@@ -33,8 +35,10 @@ impl App {
     pub fn update_subdirectories(&mut self) {
         // remove all entries from subdirectories
         self.subdirectories.clear();
+        let keys = generate_two_char_keys(HOME_ROW_KEYS);
         // find all the subdirectories within the current_dir add them to subdirectories, if
         if let Ok(entries) = fs::read_dir(&self.current_dir) {
+            let mut key_index = 0;
             for entry in entries {
                 if let Ok(entry) = entry {
                     let path = entry.path();
@@ -46,7 +50,10 @@ impl App {
                                 }
                             }
                         }
-                        self.subdirectories.push(path);
+                        if key_index < keys.len() {
+                            self.subdirectories.insert(keys[key_index].clone(), path);
+                            key_index += 1;
+                        }
                     }
                 }
             }
@@ -56,6 +63,27 @@ impl App {
     pub fn delete_input_letter(&mut self) {
         self.user_input.pop();
     }
+
+    pub fn input_letter(&mut self, letter: char) {
+        self.user_input.push(letter);
+        if self.user_input.len() == 2 {
+            if let Some(dir) = self.subdirectories.get(&self.user_input) {
+                self.set_current_dir(dir.clone());
+            }
+            self.delete_input_letter();
+            self.delete_input_letter();
+        }
+    }
+}
+
+fn generate_two_char_keys(chars: &[char]) -> Vec<String> {
+    let mut keys = Vec::new();
+    for &c1 in chars {
+        for &c2 in chars {
+            keys.push(format!("{}{}", c1, c2));
+        }
+    }
+    keys
 }
 
 pub enum OutputType {

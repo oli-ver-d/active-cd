@@ -9,8 +9,6 @@ use std::path::{Path, PathBuf};
 use crossterm::{cursor::{MoveTo}, execute, queue, event::{read, Event, KeyCode, KeyEvent}, terminal::{self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, size}, style::Print, cursor};
 use crate::app::OutputType;
 
-const HOME_ROW_KEYS: &[char] = &['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
-
 fn main() -> Result<()> {
     let current_dir = env::current_dir()?;
     let mut app = App::new(current_dir, false);
@@ -24,10 +22,10 @@ fn main() -> Result<()> {
         queue!(stderr, Clear(ClearType::All))?;
         queue!(stderr, MoveTo(0,0), Print(format!("Current Directory: {}", app.current_dir.display())))?;
 
-        for (i, subdirectory) in app.subdirectories.iter().enumerate() {
+        for (i, (key, subdirectory)) in app.subdirectories.iter().enumerate() {
             if let Some(subdir_osstr) = subdirectory.file_name() {
                 if let Some(subdir) = subdir_osstr.to_str() {
-                    queue!(stderr, MoveTo(0, (i + 2) as u16), Print(subdir))?;
+                    queue!(stderr, MoveTo(0, (i + 2) as u16), Print(format!("{key} -> {subdir}")))?;
                 }
             }
         }
@@ -65,7 +63,7 @@ fn main() -> Result<()> {
                     app.delete_input_letter();
                 }
                 KeyCode::Char(c) => {
-                    app.user_input.push(c);
+                    app.input_letter(c);
                 }
                 _ => {}
             }
