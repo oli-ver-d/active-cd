@@ -1,13 +1,21 @@
 mod app;
 
-use app::App;
+use crate::app::OutputType;
 use anyhow::Result;
+use app::App;
+use crossterm::style::{Color, SetForegroundColor};
+use crossterm::{
+    cursor,
+    cursor::MoveTo,
+    event::{read, Event, KeyCode, KeyEvent},
+    execute, queue,
+    style::Print,
+    terminal::{self, size, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen},
+};
 use std::env;
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
-use crossterm::{cursor::{MoveTo}, execute, queue, event::{read, Event, KeyCode, KeyEvent}, terminal::{self, Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen, size}, style::Print, cursor};
-use crate::app::OutputType;
 
 fn main() -> Result<()> {
     let current_dir = env::current_dir()?;
@@ -20,17 +28,32 @@ fn main() -> Result<()> {
 
     loop {
         queue!(stderr, Clear(ClearType::All))?;
-        queue!(stderr, MoveTo(0,0), Print(format!("Current Directory: {}", app.current_dir.display())))?;
+        queue!(
+            stderr,
+            MoveTo(0, 0),
+            Print(format!("Current Directory: {}", app.current_dir.display()))
+        )?;
 
         for (i, (key, subdirectory)) in app.subdirectories.iter().enumerate() {
             if let Some(subdir_osstr) = subdirectory.file_name() {
                 if let Some(subdir) = subdir_osstr.to_str() {
-                    queue!(stderr, MoveTo(0, (i + 2) as u16), Print(format!("{key} -> {subdir}")))?;
+                    queue!(stderr, SetForegroundColor(Color::Cyan))?;
+                    queue!(stderr, MoveTo(0, (i + 2) as u16), Print(format!("{key}")))?;
+                    queue!(stderr, SetForegroundColor(Color::Reset))?;
+                    queue!(
+                        stderr,
+                        MoveTo(2, (i + 2) as u16),
+                        Print(format!(" -> {subdir}"))
+                    )?;
                 }
             }
         }
 
-        queue!(stderr, MoveTo(0, rows - 1), Print(format!("{}", app.user_input)))?;
+        queue!(
+            stderr,
+            MoveTo(0, rows - 1),
+            Print(format!("{}", app.user_input))
+        )?;
         stderr.flush()?;
 
         if let Event::Key(key) = read()? {
@@ -75,7 +98,7 @@ fn main() -> Result<()> {
     match app.output {
         OutputType::Start => {
             print!("{}", app.start_dir.display());
-        },
+        }
         OutputType::Current => {
             print!("{}", app.current_dir.display());
         }

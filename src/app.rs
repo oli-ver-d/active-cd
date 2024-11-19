@@ -1,6 +1,6 @@
-use std::path::PathBuf;
 use std::collections::BTreeMap;
 use std::fs;
+use std::path::PathBuf;
 
 const HOME_ROW_KEYS: &[char] = &['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
@@ -80,7 +80,9 @@ fn generate_two_char_keys(chars: &[char]) -> Vec<String> {
     let mut keys = Vec::new();
     for &c1 in chars {
         for &c2 in chars {
-            keys.push(format!("{}{}", c1, c2));
+            if c1 != c2 {
+                keys.push(format!("{}{}", c1, c2));
+            }
         }
     }
     keys
@@ -88,5 +90,5 @@ fn generate_two_char_keys(chars: &[char]) -> Vec<String> {
 
 pub enum OutputType {
     Start,
-    Current
+    Current,
 }
