@@ -22,3 +22,7 @@ Upon calling the command you are presented with a list of subdirectories. You ca
 -   `~` - move to home directory
 -   `/` - move to root directory
 
+## Todo
+
+Make output multi-columned, pagination for more than available key combos maybe.
+beautify 
